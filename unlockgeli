@@ -14,28 +14,34 @@ stop_cmd=":"
 load_rc_config $name
 : ${unlockgeli:=no} 
 
-dummy_start()
+unlockgeli_start()
 {
 	eval pools=\${$@:-${unlockgeli_pools}}
 	for _g in $pools; do
+		echo "Unlocking $_g pool"
 		eval devs=\${unlockgeli_${_g}_devs}
 		eval key=\${unlockgeli_${_g}_key}
-		eval key_identityfile=\${unlockgeli_${_g}_identityfile}
-		eval key_username=\${unlockgeli_${_g}_username}
+		eval key_identityfile=\${unlockgeli_${_g}_key_identityfile}
 		eval passphrase=\${unlockgeli_${_g}_passphrase}
-		eval passphrase_identityfile=\${unlockgeli_${_g}_identityfile}
-		eval passphrase_username=\${unlockgeli_${_g}_username}
+		eval passphrase_identityfile=\${unlockgeli_${_g}_passphrase_identityfile}
 
 		keytempfile=/tmp/unlockgeli.key.tmp
 		pwtempfile=/tmp/unlockgeli.pw.tmp
-		scp -i ${key_identityfile} ${key_username}@${key} $keytempfile
-		scp -i ${passphrase_identityfile} ${passphrase_username}@${passphrase} $pwtempfile
-		for _d in ${group_devs}; do
+		echo "Downloading geli key"
+		scp -i ${key_identityfile} ${key} $keytempfile
+		echo "Downloading geli passphrase"
+		scp -i ${passphrase_identityfile} ${passphrase} $pwtempfile
+		for _d in ${devs}; do
+			# geli attach -k $keytempfile -j $pwtempfile $_d
+			echo "unlocking $_d"
 			geli attach -k $keytempfile -j $pwtempfile $_d
 		done
+		echo "Deleting temporary key file"
 		rm -f $keytempfile
+		echo "Deleting temporary passphrase file"
 		rm -f $pwtempfile
 
+		echo "Mounting unlocked zfs volumes"
 		zfs mount -a
 	done
 }
