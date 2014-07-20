@@ -1,4 +1,7 @@
 #!/bin/sh
+# PROVIDE: unlockgeli
+# REQUIRE: netwait
+# BEFORE: jail
 
 . /etc/rc.subr
 
@@ -18,11 +21,22 @@ dummy_start()
 		eval devs=\${unlockgeli_${_g}_devs}
 		eval key=\${unlockgeli_${_g}_key}
 		eval key_identityfile=\${unlockgeli_${_g}_identityfile}
+		eval key_username=\${unlockgeli_${_g}_username}
 		eval passphrase=\${unlockgeli_${_g}_passphrase}
 		eval passphrase_identityfile=\${unlockgeli_${_g}_identityfile}
+		eval passphrase_username=\${unlockgeli_${_g}_username}
+
+		keytempfile=/tmp/unlockgeli.key.tmp
+		pwtempfile=/tmp/unlockgeli.pw.tmp
+		scp -i ${key_identityfile} ${key_username}@${key} $keytempfile
+		scp -i ${passphrase_identityfile} ${passphrase_username}@${passphrase} $pwtempfile
 		for _d in ${group_devs}; do
-			
+			geli attach -k $keytempfile -j $pwtempfile $_d
 		done
+		rm -f $keytempfile
+		rm -f $pwtempfile
+
+		zfs mount -a
 	done
 }
 
