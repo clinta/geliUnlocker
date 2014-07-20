@@ -1,0 +1,31 @@
+#!/bin/sh
+
+. /etc/rc.subr
+
+name=unlockgeli
+rcvar=unlockgeli_enable
+
+start_cmd="${name}_start"
+stop_cmd=":"
+
+load_rc_config $name
+: ${unlockgeli:=no} 
+
+dummy_start()
+{
+	eval pools=\${$@:-${unlockgeli_pools}}
+	for _g in $pools; do
+		eval devs=\${unlockgeli_${_g}_devs}
+		eval key=\${unlockgeli_${_g}_key}
+		eval key_identityfile=\${unlockgeli_${_g}_identityfile}
+		eval passphrase=\${unlockgeli_${_g}_passphrase}
+		eval passphrase_identityfile=\${unlockgeli_${_g}_identityfile}
+		for _d in ${group_devs}; do
+			
+		done
+	done
+}
+
+case $# in
+1)	run_rc_command $@ ${geliunlock_list:-_ALL} ;;
+*)	run_rc_command $@ ;;
