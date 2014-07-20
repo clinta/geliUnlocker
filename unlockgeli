@@ -43,3 +43,4 @@ dummy_start()
 case $# in
 1)	run_rc_command $@ ${geliunlock_list:-_ALL} ;;
 *)	run_rc_command $@ ;;
+esac
