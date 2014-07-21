@@ -6,7 +6,7 @@ CATEGORIES=	sysutils
 
 USE_GITHUB=	yes
 GH_ACCOUNT=	clinta
-GH_COMMIT=	2ac4d14
+GH_COMMIT=	b6e894e
 MAINTAINER=	clint@clintarmstrong.net
 COMMENT=	Automatically unlocks geli partitions using keys and passphrases stored on remote servers.
 
