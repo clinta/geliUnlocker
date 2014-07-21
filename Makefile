@@ -6,7 +6,7 @@ CATEGORIES=	sysutils
 
 USE_GITHUB=	yes
 GH_ACCOUNT=	clinta
-GH_COMMIT=	1447dbd
+GH_COMMIT=	c31d2e7
 GH_PROJECT=	geliUnlocker
 GH_TAGNAME=	${GH_COMMIT}
 
