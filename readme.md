@@ -14,7 +14,7 @@
 1. Copy the geliunlock script to /usr/local/etc/rc.d/
 ```
 fetch https://raw.githubusercontent.com/clinta/geliUnlocker/master/unlockgeli /usr/local/etc/rc.d/
-chmod +x /usr/local/etc/rc.d
+chmod +x /usr/local/etc/rc.d/unlockgeli
 ```
 
 ## How to Use:
