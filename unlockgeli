@@ -22,24 +22,38 @@ unlockgeli_start()
 		eval devs=\${unlockgeli_${_g}_devs}
 		eval key=\${unlockgeli_${_g}_key}
 		eval key_identityfile=\${unlockgeli_${_g}_key_identityfile}
+		eval key_enc_pw=\${unlockgeli_${_g}_key_enc_pw}
 		eval passphrase=\${unlockgeli_${_g}_passphrase}
 		eval passphrase_identityfile=\${unlockgeli_${_g}_passphrase_identityfile}
+		eval passphrase_enc_pw=\${unlockgeli_${_g}_passphrase_enc_pw}
 
 		keytempfile=/tmp/unlockgeli.key.tmp
 		pwtempfile=/tmp/unlockgeli.pw.tmp
 		echo "Downloading geli key"
 		scp -i ${key_identityfile} ${key} $keytempfile
+		if [ -n ${key_enc_pw} ]; then
+			echo "Decrypting keyfile"
+			mv $keytempfile ${keytempfile}.aes
+			openssl enc -aes-256-cbc -a -salt -d -in ${keytempfile}.aes -out $keytempfile -k "${key_enc_pw}"
+			# rm -f $keytempfile.aes
+		fi
 		echo "Downloading geli passphrase"
 		scp -i ${passphrase_identityfile} ${passphrase} $pwtempfile
+		if [ -n ${passphrase_enc_pw} ]; then
+			echo "Decrypting passphrase file"
+			mv $pwtempfile ${pwtempfile}.aes
+			openssl enc -aes-256-cbc -a -salt -d -in ${pwtempfile}.aes -out $pwtempfile -k "${passphrase_enc_pw}"
+			# rm -f $pwtempfile.aes
+		fi
 		for _d in ${devs}; do
 			# geli attach -k $keytempfile -j $pwtempfile $_d
 			echo "unlocking $_d"
 			geli attach -k $keytempfile -j $pwtempfile $_d
 		done
 		echo "Deleting temporary key file"
-		rm -f $keytempfile
+		# rm -f $keytempfile
 		echo "Deleting temporary passphrase file"
-		rm -f $pwtempfile
+		# rm -f $pwtempfile
 
 		echo "Mounting unlocked zfs volumes"
 		zfs mount -a
