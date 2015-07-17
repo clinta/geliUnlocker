@@ -31,23 +31,44 @@ unlockgeli_start()
 		pwtempfile=/tmp/unlockgeli.pw.tmp
 		echo "Downloading geli key"
 		scp -i ${key_identityfile} ${key} $keytempfile
-		if [ -n ${key_enc_pw} ]; then
+		if [ "$?" -ne "0" ]; then
+		    warn "Unable to download identity file ${key}"
+		fi
+		if [ -n "${key_enc_pw}" ]; then
 			echo "Decrypting keyfile"
 			mv $keytempfile ${keytempfile}.aes
 			openssl enc -aes-256-cbc -a -salt -d -in ${keytempfile}.aes -out $keytempfile -k "${key_enc_pw}"
+			if [ "$?" -ne "0" ]; then
+			    warn "Unable to decrypt identity file ${key}"
+			fi
 			rm -f $keytempfile.aes
 		fi
-		echo "Downloading geli passphrase"
-		scp -i ${passphrase_identityfile} ${passphrase} $pwtempfile
-		if [ -n ${passphrase_enc_pw} ]; then
-			echo "Decrypting passphrase file"
-			mv $pwtempfile ${pwtempfile}.aes
-			openssl enc -aes-256-cbc -a -salt -d -in ${pwtempfile}.aes -out $pwtempfile -k "${passphrase_enc_pw}"
-			rm -f $pwtempfile.aes
+		if [ -n "${passphrase}" ]; then
+			echo "Downloading geli passphrase"
+			scp -i ${passphrase_identityfile} ${passphrase} $pwtempfile
+			if [ "$?" -ne "0" ]; then
+			    warn "Unable to download passphrase file ${passphrase}"
+			fi
+			if [ -n "${passphrase_enc_pw}" ]; then
+				echo "Decrypting passphrase file"
+				mv $pwtempfile ${pwtempfile}.aes
+				openssl enc -aes-256-cbc -a -salt -d -in ${pwtempfile}.aes -out $pwtempfile -k "${passphrase_enc_pw}"
+				if [ "$?" -ne "0" ]; then
+				    warn "Unable to decrypt passphrase file ${passphrase}"
+				fi
+				rm -f $pwtempfile.aes
+			fi
 		fi
 		for _d in ${devs}; do
-			echo "unlocking $_d"
-			geli attach -k $keytempfile -j $pwtempfile $_d
+			echo "Unlocking $_d"
+			if [ -n "${passphrase}" ]; then
+				geli attach -k $keytempfile -j $pwtempfile $_d
+			else
+				geli attach -k $keytempfile -p $_d
+			fi
+			if [ "$?" -ne "0" ]; then
+			    warn "Unable to geli attach $_d"
+			fi
 		done
 		echo "Deleting temporary key file"
 		rm -f $keytempfile
