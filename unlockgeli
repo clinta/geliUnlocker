@@ -71,9 +71,9 @@ unlockgeli_start()
 			fi
 		done
 		echo "Deleting temporary key file"
-		rm -f $keytempfile
+		rm -fP $keytempfile
 		echo "Deleting temporary passphrase file"
-		rm -f $pwtempfile
+		rm -fP $pwtempfile
 
 		echo "Mounting unlocked zfs volumes"
 		zfs mount -a
